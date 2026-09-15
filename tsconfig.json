@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"lib": ["ES2022"],
+		"types": ["@cloudflare/workers-types"],
+		"strict": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true
+	},
+	// ⚠ THIS PAIRS WITH `@types/node` IN package.json — NEVER SPLIT THEM. ⚠
+	//
+	// This config ships to every V3 site repo, and each site's deploy.yml runs
+	// `pnpm typecheck` BEFORE deploying (packages/shared/src/workflows/deploy.ts).
+	// `scripts/**/*.mts` (render-static) and the node-using tests under
+	// `src/__tests__/` both import `node:` builtins, so dropping @types/node —
+	// or widening this glob without it — fails typecheck on EVERY site deploy,
+	// fleet-wide. The template installs standalone (`--ignore-workspace`), so
+	// node types can never be inherited from a parent workspace.
+	//
+	// `scripts/**/*.mts` was added deliberately: render-static.mts was never
+	// typechecked, while its own closing comment claimed a signature change
+	// would break it at typecheck. It is the BigCloudy parity oracle — it needs
+	// the compile-time edge to src/index.ts to be real.
+	"include": ["src/**/*.ts", "scripts/**/*.mts"]
+}

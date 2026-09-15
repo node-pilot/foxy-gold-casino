@@ -1,0 +1,782 @@
+<style>
+/* ============================================================================
+ * BUILD-OWNED COMPONENT DESIGN SYSTEM — single source of truth.
+ *
+ * The model does NOT author CSS. It fills canonical HTML skeletons with the
+ * FIXED class vocabulary below; the BUILD owns every rule here. The model's
+ * only CSS surface is the 9 :root brand-colour tokens (composed AFTER this
+ * block by assemblePartial so they win the cascade). Variety across sites =
+ * palette tokens + the top/left layout toggle + dark/light. No bespoke
+ * per-site layout CSS.
+ * ========================================================================== */
+
+/* ── Reset ── */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+	background: var(--bg, #0f1419);
+	color: var(--text, #e8eef5);
+	font-family: var(--font, system-ui, sans-serif);
+	font-size: var(--fs-5, 1rem);
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+img, svg, video { max-width: 100%; height: auto; display: block; }
+h1, h2, h3, h4 { color: var(--text, #e8eef5); line-height: 1.18; margin: 0 0 0.6em; }
+/* Display-face hook for the seeded variation engine (variation.ts): a
+ * typography variation sets --font-display/--h-weight at assembly time;
+ * the neutral default falls back through --font to the system stack. */
+h1, h2, h3 { font-family: var(--font-display, var(--font, system-ui, sans-serif)); font-weight: var(--h-weight, 800); }
+h1 { font-size: var(--fs-1, 3rem); letter-spacing: -0.02em; }
+h2 { font-size: var(--fs-2, 2rem); letter-spacing: -0.01em; }
+h3 { font-size: var(--fs-3, 1.5rem); }
+p { margin: 0 0 1rem; }
+a { color: var(--brand, #2bb46c); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul, ol { margin: 0 0 1rem; padding-left: 1.3rem; }
+
+.container {
+	width: min(100% - 2rem, var(--container-max, 1200px));
+	margin-inline: auto;
+}
+
+/* ── Full-bleed page body. The CRITICAL_INLINE_CSS fallback (assemble.ts) caps
+ * <main> at max-width:1200px + side padding so an UNSTYLED cached page stays
+ * legible. But the design system makes sections full-bleed (hero gradient,
+ * .section--alt bands) and re-introduces content width via .container /
+ * .hero-inner — so once this stylesheet loads, <main> must span the FULL
+ * viewport, else the hero gradient + alt bands are trapped in a centered 1200px
+ * box with dark gutters (operator: hero cut off on the sides). Source-order
+ * wins over the equal-specificity fallback rule; .container handles width. ── */
+main { max-width: none; margin-inline: 0; padding: 0; }
+
+/* Screen-reader-only — accessible label without visible duplication. */
+.sr-only, .vh, .visually-hidden {
+	position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+	overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ── Section rhythm — THE spacing fix. Every section.section gets the SAME
+ * vertical padding token so vertical gaps are consistent across every model
+ * (kills gemini's huge empty gaps). --section--alt alternates the surface bg;
+ * --section--tight halves the padding for dense bands. ── */
+section.section {
+	padding-block: var(--section-y, 4rem);
+}
+section.section > .container { width: min(100% - 2rem, var(--container-max, 1200px)); margin-inline: auto; }
+.section--alt { background: var(--surface, #1a2028); }
+.section--tight { padding-block: calc(var(--section-y, 4rem) * 0.55); }
+.section-head { max-width: 60ch; margin: 0 0 var(--gap, 1.5rem); }
+.section-head p { color: var(--text-muted, #9aa5b1); font-size: var(--fs-4, 1.15rem); margin: 0; }
+
+/* HTML sitemap page — build-generated /sitemap link hub. Responsive columns. */
+.sitemap-list {
+	list-style: none; margin: 0; padding: 0;
+	display: grid; gap: 0.6rem 1.5rem;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+.sitemap-list li { margin: 0; }
+.sitemap-list a { font-weight: 600; }
+.eyebrow {
+	display: inline-block; font-size: var(--fs-6, 0.85rem); font-weight: 700;
+	letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand, #2bb46c);
+	margin: 0 0 0.5rem;
+}
+
+/* ── Hero — balanced 2-col grid (copy + media). Collapses to 1-col ≤768px.
+ * Fixes gpt's unbalanced text-blob hero: the media column is a real,
+ * constrained panel, not "whatever's left". The hero is a tasteful brand
+ * GRADIENT band (CSS treatment, operator: never blow up one square game tile
+ * into a banner) — wide visuals come from the gradient + alt surface, NOT a
+ * stretched image. The optional .hero-media holds a SMALL framed product
+ * image, capped so it can never dominate the hero. ── */
+.hero {
+	padding-block: var(--section-y, 4rem);
+	/* The gradient must COVER the full hero box, not stop short (operator: the
+	 * background gradient was cut off). background-size:cover + no-repeat pins it
+	 * to the whole element, and the linear stop reaches --bg at 100% so a tall
+	 * hero never shows a flat band where the gradient ran out. */
+	background:
+		radial-gradient(120% 120% at 85% 10%, color-mix(in srgb, var(--brand, #2bb46c) 22%, transparent) 0%, transparent 60%),
+		linear-gradient(160deg, color-mix(in srgb, var(--brand-2, #1f8f54) 16%, var(--bg, #0f1419)) 0%, var(--bg, #0f1419) 100%);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+.hero-inner {
+	display: grid; align-items: center; gap: clamp(1.5rem, 4vw, 3rem);
+	grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+}
+.hero-copy h1 { margin-top: 0; }
+.hero-copy p { color: var(--text-muted, #9aa5b1); font-size: var(--fs-4, 1.15rem); max-width: 52ch; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; align-items: center; }
+.hero-media {
+	border-radius: var(--radius, 14px); overflow: hidden;
+	background: var(--surface, #1a2028); border: 1px solid var(--border, rgba(255,255,255,0.08));
+	min-height: 220px; display: flex; align-items: center; justify-content: center;
+}
+.hero-media img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 768px) {
+	.hero-inner { grid-template-columns: 1fr; }
+	.hero-media { order: -1; }
+}
+
+/* ── Content-image size discipline (operator: "images are never meant to be
+ * more than 25% of the width of a site"). DESKTOP-ONLY cap (≥768px): a stray
+ * content <img> — including one dropped into the hero — can never exceed ~25%
+ * of its container. On phones (<768px) the cap RELAXES (img stays max-width:100%
+ * from the reset) so a single image isn't left a tiny stamp on a narrow screen.
+ *
+ * Build components (game tiles, cards, icons, provider/payment strips,
+ * .hero-media) nest their <img> deep, so the cap below uses DIRECT-CHILD
+ * combinators to target only loose/shallow images and never touches a
+ * component image — those keep their own build-owned sizing. ── */
+@media (min-width: 768px) {
+	/* Cap only LOOSE / shallow content images — a stray <img> the model drops
+	 * directly into a section, hero copy, or paragraph. DIRECT-CHILD (>)
+	 * combinators are deliberate: build components nest their <img> several levels
+	 * deep (.container > .grid-games > .game-card > a > img, .provider-strip > img,
+	 * .hero-media > img, .card > .card-icon, …), so none of them match here and
+	 * each keeps its own build-owned sizing (e.g. .game-card img fills the tile
+	 * via object-fit:cover). This replaces an earlier broad "main img:not(...)"
+	 * cap whose (0,4,2) specificity beat every component rule and shrank the game
+	 * tiles to a 25% thumbnail in the corner. On phones (<768px) the cap relaxes
+	 * (img stays max-width:100% from the reset) so a lone image isn't a tiny
+	 * stamp on a narrow screen. */
+	section.section > .container > img,
+	section.section > .container > p > img,
+	.hero-copy > img,
+	.hero-copy > p > img,
+	.hero-inner > img {
+		max-width: min(25%, 360px);
+		height: auto;
+	}
+}
+
+/* ── Card grid — generic 3-up content cards (USPs, info). ── */
+.card-grid {
+	display: grid; gap: var(--gap, 1.5rem);
+	grid-template-columns: 1fr;
+}
+@media (min-width: 640px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
+.card {
+	background: var(--surface, #1a2028);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: var(--radius, 14px); padding: 1.5rem;
+}
+.card-icon {
+	width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+	border-radius: 12px; background: color-mix(in srgb, var(--brand, #2bb46c) 18%, transparent);
+	color: var(--brand, #2bb46c); font-size: 1.4rem; margin-bottom: 0.9rem;
+}
+.card-icon img, .card-icon svg { width: 24px; height: 24px; }
+.card-title { font-size: var(--fs-4, 1.15rem); margin: 0 0 0.4rem; }
+.card-body { color: var(--text-muted, #9aa5b1); margin: 0; }
+
+/* ── Feature block — styled cards with FIXED-SIZE icons + title + text.
+ * Fixes gemini's bare floating feature labels: a feature is always a styled
+ * card with an icon chip, never an unstyled label. ── */
+.feature-grid {
+	display: grid; gap: var(--gap, 1.5rem);
+	grid-template-columns: 1fr;
+}
+@media (min-width: 640px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .feature-grid { grid-template-columns: repeat(3, 1fr); } }
+.feature {
+	display: flex; flex-direction: column; gap: 0.5rem;
+	background: var(--surface, #1a2028);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: var(--radius, 14px); padding: 1.4rem;
+}
+.feature-icon {
+	width: 48px; height: 48px; flex: 0 0 48px;
+	display: inline-flex; align-items: center; justify-content: center;
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--brand, #2bb46c) 18%, transparent);
+	color: var(--brand, #2bb46c); font-size: 1.5rem; line-height: 1;
+}
+.feature-icon img, .feature-icon svg { width: 26px; height: 26px; object-fit: contain; }
+.feature-title { font-size: var(--fs-4, 1.15rem); margin: 0; }
+.feature-text { color: var(--text-muted, #9aa5b1); margin: 0; }
+
+/* ── Buttons ── */
+.btn, .cta, .play-btn {
+	display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+	background: var(--brand, #2bb46c); color: var(--on-brand, #fff);
+	padding: 0.7rem 1.3rem; border-radius: var(--btn-radius, 999px); font-weight: 700;
+	font-size: var(--fs-5, 1rem); text-decoration: none; border: 0; cursor: pointer;
+	transition: background .18s ease, transform .18s ease; line-height: 1.2;
+}
+.btn:hover, .cta:hover, .play-btn:hover {
+	background: var(--brand-2, #1f8f54); text-decoration: none; transform: translateY(-1px);
+}
+.btn-ghost {
+	display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+	background: transparent; color: var(--text, #e8eef5);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	padding: 0.7rem 1.3rem; border-radius: var(--btn-radius, 999px); font-weight: 700;
+	font-size: var(--fs-5, 1rem); text-decoration: none; cursor: pointer;
+	transition: border-color .18s ease, color .18s ease;
+}
+.btn-ghost:hover { border-color: var(--brand, #2bb46c); color: var(--brand, #2bb46c); text-decoration: none; }
+/* Unresolved aff-link placeholder (runtime swaps <aff-link> → this <a href="#">
+ * when no assignment exists). Reads + behaves as a live CTA. */
+.aff-link-unresolved {
+	display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+	background: var(--brand, #2bb46c); color: var(--on-brand, #fff) !important;
+	padding: 0.7rem 1.3rem; border-radius: var(--btn-radius, 999px); font-weight: 700;
+	text-decoration: none; cursor: pointer; opacity: 0.97;
+}
+.aff-link-unresolved:hover { background: var(--brand-2, #1f8f54); text-decoration: none; opacity: 1; }
+
+/* ── Header / nav — TOP variant (default; <body class="layout-top">) ── */
+.site-header {
+	background: var(--surface, #1a2028);
+	border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+	padding: 0.9rem 0;
+}
+/* Flex the dedicated header wrapper ONLY — never overload bare .container, which
+ * also wraps content sections (the model authors those with .container for the
+ * width constraint, NOT for flex). composeHeader always emits the inner div with
+ * BOTH classes (container + header-inner), so .header-inner alone still matches
+ * it and the base .container rule supplies the width. */
+.site-header .header-inner {
+	display: flex; align-items: center; justify-content: space-between;
+	gap: 1rem; flex-wrap: wrap; min-height: 48px;
+	width: min(100% - 2rem, var(--container-max, 1200px)); margin-inline: auto;
+}
+.brand-wordmark {
+	color: var(--brand, #2bb46c); font-weight: 800; font-size: 1.3rem;
+	letter-spacing: -0.02em; text-decoration: none;
+}
+.brand { display: inline-flex; align-items: center; gap: 0.5rem; }
+.brand-logo { height: 32px; width: auto; display: block; }
+.site-header .brand-logo { height: clamp(28px, 4vw, 36px); }
+.main-nav, .site-nav { display: flex; gap: 1.4rem; }
+.main-nav ul, .main-nav .nav-list, .main-nav ol {
+	list-style: none; padding: 0; margin: 0; display: flex; gap: 1.4rem; flex-wrap: wrap;
+}
+.main-nav li, .site-nav li { list-style: none; }
+.main-nav a, .site-nav a { color: var(--text, #e8eef5); font-weight: 600; }
+.main-nav a:hover, .site-nav a:hover { color: var(--brand, #2bb46c); text-decoration: none; }
+.header-actions { display: flex; gap: 1.25rem; align-items: center; }
+/* Clear separation between the lang switcher and the primary header CTA — the
+ * CTA must not crowd the language links (operator: too close). Holds at all
+ * breakpoints (the gap is in the flex container; this margin reinforces it even
+ * if the lang-switch is absent/wraps). */
+.header-actions > .aff-link-unresolved,
+.header-actions > a[data-aff],
+.header-actions > .btn,
+.header-actions > .cta { margin-left: 0.5rem; }
+.lang-switch { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--fs-6, 0.85rem); }
+.lang-switch a { color: var(--text-muted, #9aa5b1); font-weight: 700; }
+.lang-switch a[aria-current="true"], .lang-switch a.is-active { color: var(--brand, #2bb46c); text-decoration: underline; }
+/* ── CSS-only mobile hamburger (no JS, no form). The visually-hidden
+ * #nav-toggle checkbox + its label (.mobile-nav-toggle) toggle .main-nav via
+ * the :checked sibling selector at the mobile breakpoint. Desktop keeps the
+ * full horizontal nav and the toggle is hidden. ── */
+.nav-toggle { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); overflow: hidden; white-space: nowrap; }
+.mobile-nav-toggle {
+	display: none; align-items: center; justify-content: center;
+	width: 44px; height: 44px; cursor: pointer; color: var(--text, #e8eef5);
+	border-radius: 8px; -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-toggle:hover { color: var(--brand, #2bb46c); }
+/* Hamburger glyph drawn from a span + its ::before/::after (the three bars). */
+.nav-toggle-bars, .nav-toggle-bars::before, .nav-toggle-bars::after {
+	display: block; width: 24px; height: 2px; background: currentColor;
+	border-radius: 2px; transition: transform .2s ease, opacity .2s ease;
+}
+.nav-toggle-bars { position: relative; }
+.nav-toggle-bars::before, .nav-toggle-bars::after { content: ""; position: absolute; left: 0; }
+.nav-toggle-bars::before { top: -7px; }
+.nav-toggle-bars::after { top: 7px; }
+/* Keyboard focus ring on the label (the checkbox is off-screen). */
+.nav-toggle:focus-visible + .mobile-nav-toggle { outline: 2px solid var(--brand, #2bb46c); outline-offset: 2px; }
+
+/* Mobile: the hamburger appears and the nav collapses into a dropdown panel
+ * that the checkbox reveals. Designed mobile-first for 375px. */
+@media (max-width: 768px) {
+	.mobile-nav-toggle { display: inline-flex; order: 3; }
+	.site-header .header-inner, .site-header .container { flex-wrap: wrap; }
+	/* Collapsed by default — full width row below the lockup, hidden until open. */
+	.site-header .main-nav, .site-header .site-nav {
+		display: none; order: 4; flex-basis: 100%; width: 100%;
+		flex-direction: column; gap: 0;
+		margin-top: 0.75rem; padding-top: 0.5rem;
+		border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+	}
+	.site-header .main-nav ul, .site-header .main-nav .nav-list, .site-header .main-nav ol {
+		flex-direction: column; gap: 0; width: 100%;
+	}
+	.site-header .main-nav a, .site-header .site-nav a {
+		display: block; width: 100%; padding: 0.75rem 0.25rem;
+	}
+	/* :checked sibling reveals the nav — pure CSS, no script. Force column here
+	 * (specificity 0,3,0) so the LEFT layout rule .layout-left .main-nav with
+	 * flex-direction:row (0,2,0) cannot make the open mobile menu lay out as a row. */
+	.nav-toggle:checked ~ .main-nav, .nav-toggle:checked ~ .site-nav { display: flex; flex-direction: column; }
+	/* Morph the bars into an X when open. */
+	.nav-toggle:checked ~ .mobile-nav-toggle .nav-toggle-bars { background: transparent; }
+	.nav-toggle:checked ~ .mobile-nav-toggle .nav-toggle-bars::before { top: 0; transform: rotate(45deg); }
+	.nav-toggle:checked ~ .mobile-nav-toggle .nav-toggle-bars::after { top: 0; transform: rotate(-45deg); }
+}
+
+/* ── Header / nav — LEFT variant (<body class="layout-left">) ── */
+.layout-left .site-header {
+	position: fixed; top: 0; left: 0; bottom: 0;
+	width: var(--sidebar-w, 240px);
+	border-bottom: 0; border-right: 1px solid var(--border, rgba(255,255,255,0.08));
+	padding: 1.5rem 1rem; overflow-y: auto;
+}
+.layout-left .site-header .header-inner,
+.layout-left .site-header .container {
+	flex-direction: column; align-items: flex-start; gap: 1.5rem;
+}
+.layout-left .main-nav, .layout-left .site-nav { flex-direction: column; gap: 0.5rem; width: 100%; }
+.layout-left .main-nav ul, .layout-left .main-nav .nav-list { flex-direction: column; gap: 0.5rem; width: 100%; }
+.layout-left .main-nav a, .layout-left .site-nav a {
+	display: block; padding: 0.5rem 0.6rem; border-radius: 8px; width: 100%;
+}
+.layout-left .main-nav a:hover, .layout-left .site-nav a:hover { background: var(--bg, #0f1419); }
+.layout-left main, .layout-left .site-footer { margin-left: var(--sidebar-w, 240px); }
+@media (max-width: 1023px) {
+	.layout-left .site-header {
+		position: static; width: auto; border-right: 0;
+		border-bottom: 1px solid var(--border, rgba(255,255,255,0.08)); padding: 0.9rem 0;
+	}
+	.layout-left .site-header .header-inner { flex-direction: row; align-items: center; }
+	.layout-left .main-nav, .layout-left .site-nav { flex-direction: row; }
+	.layout-left main, .layout-left .site-footer { margin-left: 0; }
+}
+
+/* ── Game grid + cards — PRESERVED from the existing system, harmonised with
+ * the new radius/gap tokens. Art-first: title baked into artwork, no <h3>
+ * below. Mobile stays 2-col (real lobby density). ── */
+/* Symmetric responsive lobby grid — EQUAL columns + CONSISTENT gaps at every
+ * breakpoint. minmax(0,1fr) keeps columns equal-width even with wide art (no
+ * blowout). 2-col mobile / 3-col tablet / 4-col desktop. A tile count divisible
+ * by 12 fills complete rows at all three widths (no ragged last row); the prompt
+ * mandates the count. */
+.grid-games { display: grid; gap: 0.75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 768px) { .grid-games { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; } }
+@media (min-width: 1280px) { .grid-games { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.game-card {
+	position: relative; border-radius: var(--radius, 14px); overflow: hidden;
+	aspect-ratio: 3 / 4; background: var(--surface, #1a2028);
+	transition: transform .2s ease;
+}
+.game-card:hover { transform: translateY(-2px); }
+.game-card > a, .game-card > .aff-link-unresolved {
+	display: block; position: absolute; inset: 0; color: inherit; text-decoration: none; padding: 0;
+}
+.game-card > a:hover, .game-card > .aff-link-unresolved:hover { text-decoration: none; }
+.game-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.game-card .badge { z-index: 2; }
+.badge {
+	position: absolute; top: .5rem; right: .5rem;
+	background: var(--brand, #2bb46c); color: var(--on-brand, #fff);
+	padding: .25rem .5rem; border-radius: 6px; font-size: .65rem;
+	font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+}
+/* Bottom scrim — a TALL gradient (covers ~55% of the tile) so the studio label
+ * + Play CTA always meet contrast over busy game art (operator fix: text washed
+ * out). The scrim is its own full-cover layer; the overlay content sits on top. */
+.game-card::after {
+	content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 55%;
+	background: linear-gradient(to top, rgba(0, 0, 0, .92) 0%, rgba(0, 0, 0, .55) 45%, transparent 100%);
+	pointer-events: none; z-index: 1;
+}
+.game-overlay {
+	position: absolute; left: 0; right: 0; bottom: 0; padding: .6rem .75rem; z-index: 2;
+	display: flex; align-items: end; justify-content: space-between; gap: .5rem;
+}
+.game-overlay .provider {
+	color: #fff; font-size: .7rem; font-weight: 600; opacity: 1;
+	text-transform: uppercase; letter-spacing: .04em;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+/* Play CTA on a tile — solid, high-contrast (not faint green over art):
+ * full brand fill + a ring + shadow so it reads as a button on any artwork. */
+.game-card .play-btn {
+	padding: .35rem .85rem; font-size: .8rem; opacity: 1;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .45);
+}
+.games-hero-row { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.game-card--hero { aspect-ratio: 1 / 1; }
+@media (max-width: 767px) { .games-hero-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ── Bonus / promo cards ── */
+.bonus-grid {
+	display: grid; gap: var(--gap, 1.5rem);
+	grid-template-columns: 1fr;
+}
+@media (min-width: 640px) { .bonus-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .bonus-grid { grid-template-columns: repeat(3, 1fr); } }
+.bonus-card {
+	display: flex; flex-direction: column; gap: 0.6rem;
+	background: var(--surface, #1a2028);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: var(--radius, 14px); padding: 1.6rem;
+	position: relative; overflow: hidden;
+}
+.bonus-card::before {
+	content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+	background: linear-gradient(90deg, var(--brand, #2bb46c), var(--accent, #ffcd4d));
+}
+.bonus-amount {
+	font-size: var(--fs-2, 2rem); font-weight: 800; line-height: 1.05;
+	color: var(--accent, #ffcd4d); margin: 0.3rem 0 0;
+}
+.bonus-title { font-size: var(--fs-4, 1.15rem); margin: 0; }
+.bonus-card .btn, .bonus-card .cta, .bonus-card .aff-link-unresolved { margin-top: auto; align-self: flex-start; }
+.bonus-terms { font-size: var(--fs-6, 0.85rem); color: var(--text-muted, #9aa5b1); margin: 0; }
+
+/* ── Provider strip — monochrome/colour logo row on a subtle card. ── */
+.provider-strip {
+	display: flex; flex-wrap: wrap; gap: 1.25rem 2rem; align-items: center; justify-content: center;
+	padding: 1.5rem; border-radius: var(--radius, 14px);
+	background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.provider-logo, .payment-logo, .compliance-badge {
+	height: clamp(34px, 5vw, 52px); width: auto; max-width: 140px;
+	object-fit: contain; opacity: 0.85; transition: opacity .18s ease;
+}
+.provider-logo:hover, .payment-logo:hover, .compliance-badge:hover { opacity: 1; }
+/* Payment logos — BIGGER + UNIFORM + ALIGNED (operator fix: render too small /
+ * uneven). Larger fixed height than the shared rule, every mark on a uniform
+ * light chip of equal height so the row reads as an aligned grid, not a ragged
+ * mix of sizes. ── */
+.payment-logo {
+	height: clamp(28px, 4.5vw, 40px); max-width: 120px;
+	opacity: 1;
+}
+/* Payment logos AND compliance badges ride a CHIP so single-colour marks stay
+ * visible on any surface. The DEFAULT chip is white (suits dark-ink marks);
+ * per-mark data-ink overrides below give light-ink marks a dark chip so the row
+ * is consistent AND every mark is legible. NEVER filter:invert.
+ * CASCADE: scoped under .site-footer .footer-badges (0,3,0) so the chip BEATS
+ * the generic ".footer-badges > *" wrapper tint rgba(255,255,255,.06) (0,2,0) —
+ * otherwise the faint dark tint won on source order and every dark mark
+ * (GamCare / 18+ / Visa) sat dark-on-dark (operator fix #2). */
+.site-footer .footer-badges .payment-logo, .site-footer .footer-badges .compliance-badge {
+	background: #fff; padding: 6px 10px; border-radius: 8px;
+	box-sizing: content-box; opacity: 1;
+}
+/* Per-mark contrast (build classifies each badge's INK from its SVG bytes and
+ * stamps data-ink): a LIGHT-ink mark made for a dark bg (begambleaware: orange +
+ * white) gets a DARK chip; a DARK-ink mark (gamcare deep purple) keeps the white
+ * chip; a FLEX mark (currentColor — age-18-plus, payment mono) keeps the white
+ * chip and is recoloured to a dark ink. Self-contained (independent of the page
+ * --bg theme) so a light mark reads on light AND dark sites.
+ * CASCADE: class + class + class + [attr] = (0,4,0) — beats the (0,3,0) white
+ * chip above on BOTH specificity and source order, with no !important. */
+.site-footer .footer-badges .compliance-badge[data-ink="light"],
+.site-footer .footer-badges .payment-logo[data-ink="light"] {
+	background: #11161d;
+}
+.site-footer .footer-badges .compliance-badge[data-ink="dark"],
+.site-footer .footer-badges .payment-logo[data-ink="dark"] {
+	background: #fff;
+}
+.site-footer .footer-badges .compliance-badge[data-ink="flex"],
+.site-footer .footer-badges .payment-logo[data-ink="flex"] {
+	background: #fff; color: #11161d;
+}
+/* Provider chip is THEME-AWARE (operator fix: white logos on a LIGHT palette
+ * rendered white-on-white — betninjanz). The fixed rgba(255,255,255,.06) chip
+ * worked on dark themes but went near-WHITE on a light --surface, hiding the
+ * white/light logo the model attaches for that theme. Deriving the chip from the
+ * palette tokens keeps it a SUBTLE TINT of the page surface in BOTH themes —
+ * a faint light tint on dark, a faint dark tint on light — so it is NEVER solid
+ * white and always sits between the page and the theme-matched logo's fill. The
+ * model still MUST attach the theme-correct variant (dark logo on light, light
+ * logo on dark — see prompts/index.ts); the chip is the safety net that keeps a
+ * borderline logo legible. Same padding/radius/box-sizing as the white-plate
+ * marks so the row stays uniform. */
+.provider-logo {
+	background: color-mix(in srgb, var(--text, #e8eef5) 6%, var(--surface, #1a2028));
+	padding: 6px 10px; border-radius: 8px;
+	box-sizing: content-box; opacity: 1;
+}
+/* Compliance badges keep their taller fixed height on top of the shared plate. */
+.compliance-badge {
+	height: clamp(40px, 5vw, 48px);
+}
+.payment-row, .compliance-row { padding: 1.5rem 0; }
+.payment-list, .compliance-list {
+	list-style: none; margin: 0; padding: 0;
+	display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center;
+}
+.payment-list li, .compliance-list li {
+	display: flex; align-items: center; justify-content: center;
+	padding: 0.5rem 0.85rem; border-radius: 8px; background: rgba(255, 255, 255, 0.04);
+}
+/* Payment chips share ONE height + a white plate so the marks baseline-align
+ * into an even grid (operator: align + consistent dimensions). */
+.payment-list li {
+	min-height: 3.25rem; min-width: 4.5rem; padding: 0.4rem 0.9rem;
+	background: #fff;
+}
+.payment-list li .payment-logo { height: clamp(24px, 4vw, 34px); }
+
+/* ── CTA band — full-width alt surface, centered headline + CTA. ── */
+.cta-band {
+	background: var(--surface, #1a2028);
+	border-block: 1px solid var(--border, rgba(255,255,255,0.08));
+	padding-block: var(--section-y, 4rem); text-align: center;
+}
+.cta-band .container { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.cta-band h2 { font-size: var(--fs-2, 2rem); margin: 0; max-width: 22ch; }
+.cta-band p { color: var(--text-muted, #9aa5b1); max-width: 52ch; margin: 0; }
+.cta-band .btn, .cta-band .cta, .cta-band .aff-link-unresolved { margin-top: 0.5rem; padding: 0.85rem 1.8rem; font-size: var(--fs-4, 1.15rem); }
+
+/* ── Game carousel — horizontal scroll-snap row of game tiles (no JS). One of
+ * the seeded optional home sections. Tiles keep .game-card styling; the track
+ * just scroll-snaps so it reads as a swipeable shelf on every viewport. ── */
+.game-carousel { position: relative; }
+.game-carousel .carousel-track {
+	display: grid; grid-auto-flow: column;
+	grid-auto-columns: minmax(150px, 1fr);
+	gap: var(--card-gap, 1rem);
+	overflow-x: auto; scroll-snap-type: x mandatory;
+	padding-bottom: 0.75rem; -webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+}
+@media (min-width: 768px) { .game-carousel .carousel-track { grid-auto-columns: minmax(190px, 1fr); } }
+.game-carousel .carousel-track > * { scroll-snap-align: start; }
+
+/* ── Upsell banner — single wide promo strip (offer + CTA). Seeded optional. ── */
+.upsell-banner {
+	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem;
+	background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 22%, var(--surface)), var(--surface));
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: var(--card-radius, 16px); padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+.upsell-banner .upsell-copy { flex: 1 1 320px; }
+.upsell-banner h2, .upsell-banner h3 { margin: 0 0 0.4rem; font-size: var(--fs-3, 1.5rem); }
+.upsell-banner p { margin: 0; color: var(--text-muted, #9aa5b1); }
+
+/* ── Registration banner — "join in 60 seconds" sign-up step strip. Seeded
+ * optional. The steps are a simple numbered flex row; CTA sits at the end. ── */
+.registration-banner {
+	background: var(--surface, #1a2028);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: var(--card-radius, 16px); padding: clamp(1.25rem, 3vw, 2.25rem);
+	text-align: center;
+}
+.registration-banner h2 { margin: 0 0 1.25rem; font-size: var(--fs-2, 2rem); }
+.registration-banner .reg-steps {
+	display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.5rem;
+}
+.registration-banner .reg-step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.registration-banner .reg-step .reg-num {
+	width: 2.4rem; height: 2.4rem; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+	background: var(--brand, #2bb46c); color: var(--on-brand, #fff); font-weight: 800; font-size: var(--fs-4, 1.15rem);
+}
+
+/* ── FAQ — zero-JS <details>/<summary>. ── */
+.faq { display: flex; flex-direction: column; gap: 0.75rem; max-width: 820px; }
+.faq-item {
+	background: var(--surface, #1a2028);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-radius: 12px; overflow: hidden;
+}
+.faq-item > summary {
+	list-style: none; cursor: pointer; padding: 1.1rem 1.3rem; font-weight: 700;
+	font-size: var(--fs-4, 1.15rem); display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-item > summary::after { content: "+"; color: var(--brand, #2bb46c); font-size: 1.4rem; line-height: 1; }
+.faq-item[open] > summary::after { content: "\2212"; }
+.faq-item > summary + * { padding: 0 1.3rem 1.2rem; color: var(--text-muted, #9aa5b1); margin: 0; }
+
+/* ── Disclaimer bar — full-width responsible-gambling / age band (e.g. a top or
+ * bottom "18+ Gamble responsibly" strip). Full-bleed background; inner content
+ * is ALWAYS centered in a max-width .bar-inner with horizontal padding so the
+ * 18+ chip + its accent can NEVER clip at the viewport edge (operator fix:
+ * red 18+ accent was clipped left). The chip is sized to fully contain its own
+ * border/accent. ── */
+.disclaimer-bar {
+	background: var(--surface, #1a2028);
+	border-block: 1px solid var(--border, rgba(255,255,255,0.08));
+	color: var(--text-muted, #9aa5b1);
+	font-size: var(--fs-6, 0.85rem);
+}
+.disclaimer-bar .bar-inner {
+	width: min(100% - 2rem, var(--container-max, 1200px));
+	margin-inline: auto;
+	display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 0.9rem;
+	padding-block: 0.7rem;
+}
+.disclaimer-bar a { color: var(--brand, #2bb46c); }
+/* The 18+ chip — a self-contained pill that fully holds its own accent border
+ * (nothing bleeds past its box). Use anywhere an "18+" age marker is shown. */
+.age-chip {
+	display: inline-flex; align-items: center; justify-content: center;
+	flex: 0 0 auto; box-sizing: border-box;
+	min-width: 2.4rem; height: 1.6rem; padding: 0 0.55rem;
+	border: 2px solid var(--accent, #ffcd4d); border-radius: 999px;
+	color: var(--text, #e8eef5); background: transparent;
+	font-weight: 800; font-size: var(--fs-6, 0.85rem); letter-spacing: 0.02em;
+	line-height: 1;
+}
+
+/* ── Responsible-gambling note — the ONLY notice-style component. No generic
+ * .alert/.notice/.warning ships (kills stray yellow alert bars). The model
+ * authors this as a PROSE blurb ("18+. Gamble responsibly … See our <a>tools</a>,
+ * or visit <a>BeGambleAware.org</a> …", prompts/index.ts) — inline <strong> + mid-
+ * sentence <a> links. It must render as normal flowing prose: a display:flex
+ * here turned every inline child into a separate flex item, scattering the
+ * sentence + its links into gapped columns (operator fix). Plain block, links
+ * flow inline. ── */
+.rg-note {
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid var(--border, rgba(255,255,255,0.08));
+	border-left: 3px solid var(--accent, #ffcd4d);
+	border-radius: 10px; padding: 1rem 1.2rem;
+	font-family: var(--font, system-ui, sans-serif);
+	font-size: var(--fs-6, 0.85rem); color: var(--text-muted, #9aa5b1);
+}
+.rg-note strong { color: var(--text, #e8eef5); }
+/* Links inside the RG module read as PART of the body copy, not standout brand
+ * links. The global a rule paints them brand-green; here both module containers
+ * inherit their own colour + font (color/font: inherit) so an <a> tracks the
+ * surrounding text — and, crucially, each SITE's own palette + --font/--font-
+ * display variation (no baked literal → no shared cross-site CSS fingerprint).
+ * Scoped to the containers (one rule each, future-proof) — overrides the global
+ * a-colour brand rule. The .rg-note paragraph keeps an underline as the inline-
+ * link affordance (links sit mid-sentence); the .footer-rg link COLUMN stays
+ * decoration-free so it matches the sibling .footer-nav columns. The explicit
+ * display:inline overrides the .site-footer a {display:block} rule (the RG note
+ * lives INSIDE the footer) so the mid-sentence links FLOW in the paragraph
+ * instead of each breaking onto its own line (operator fix: links as a column). */
+.site-footer .rg-note a { display: inline; color: inherit; font: inherit; text-decoration: underline; }
+.site-footer .footer-rg a { color: inherit; font: inherit; text-decoration: none; }
+
+/* ── Footer — polished multi-column casino footer ── */
+.site-footer {
+	background: color-mix(in srgb, var(--bg, #0f1419) 88%, #000 12%);
+	border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+	padding: var(--section-y, 4rem) 0 1.5rem; margin-top: var(--section-y, 4rem);
+	color: var(--text-muted, #9aa5b1);
+}
+.site-footer .footer-grid {
+	display: grid; gap: 2rem;
+	grid-template-columns: 1.6fr repeat(3, 1fr);
+}
+.site-footer .footer-brand .brand-wordmark { display: inline-block; margin-bottom: 0.6rem; font-size: 1.4rem; }
+.site-footer .footer-tagline { margin: 0 0 1rem; max-width: 32ch; font-size: 0.9rem; }
+.site-footer h4 {
+	color: var(--text, #e8eef5); font-size: 0.8rem; text-transform: uppercase;
+	letter-spacing: 0.06em; margin: 0 0 0.8rem;
+}
+.site-footer .footer-nav { display: flex; flex-direction: column; }
+.site-footer a { display: block; color: var(--text-muted, #9aa5b1); margin: 0.3rem 0; }
+.site-footer a:hover { color: var(--text, #e8eef5); text-decoration: none; }
+.site-footer .footer-rg { display: flex; flex-direction: column; font-family: var(--font, system-ui, sans-serif); }
+.site-footer .rg-badge {
+	display: inline-flex; align-items: center; justify-content: center;
+	flex: 0 0 auto; box-sizing: border-box;
+	width: 2.4rem; height: 2.4rem; border-radius: 50%;
+	border: 2px solid var(--text-muted, #9aa5b1); color: var(--text, #e8eef5);
+	font-weight: 700; font-size: 0.8rem; margin-bottom: 0.6rem;
+}
+.site-footer .footer-badges {
+	display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;
+	padding: 1.5rem 0; margin-top: 1.5rem;
+	border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.site-footer .footer-badges > * {
+	display: inline-flex; align-items: center; justify-content: center;
+	padding: 0.5rem 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.06);
+}
+.site-footer .footer-badges img { height: clamp(28px, 4vw, 44px); width: auto; opacity: 0.9; }
+.site-footer .footer-badges img:hover { opacity: 1; }
+.site-footer .footer-bottom {
+	display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+	justify-content: space-between; align-items: center;
+	padding-top: 1.5rem; border-top: 1px solid var(--border, rgba(255,255,255,0.08));
+	font-size: 0.8rem;
+}
+@media (max-width: 767px) {
+	.site-footer .footer-grid { grid-template-columns: 1fr 1fr; }
+	.site-footer .footer-brand { grid-column: 1 / -1; }
+}
+
+/* ── Cookie consent banner — BUILD-OWNED. The banner markup + script are emitted
+ * by composeFooter (build-owned chrome), NOT authored per-page by the model: a
+ * model-authored banner shipped on ONE page with sloppy copy (operator fix:
+ * Spino Rhino). The build now owns the structure (one consistent banner on every
+ * page via the footer partial, localized via footer DATA); stripPageChrome()
+ * removes any stray model-authored banner from body_html so a duplicate can
+ * never leak. Keep this component styled. ── */
+.cookie-banner, #cb {
+	position: fixed; left: 1rem; right: 1rem; bottom: 1rem;
+	max-width: 42rem; margin: 0 auto; padding: 1rem;
+	display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+	background: var(--surface, #1a2028); color: var(--text, #e8eef5);
+	border: 1px solid var(--border, rgba(255,255,255,0.08)); border-radius: var(--card-radius, 0.5rem);
+	font-size: var(--fs-6, 0.85rem); line-height: 1.4; z-index: 9999;
+	box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+.cookie-banner[hidden], #cb[hidden] { display: none; }
+.cookie-banner p, #cb p { margin: 0; flex: 1 1 16rem; }
+.cookie-banner a, #cb a { color: var(--brand, #2bb46c); }
+.cookie-banner .btn, .cookie-banner .btn-ghost, #cb button { padding: .5rem .9rem; border-radius: var(--btn-radius, .35rem); font-size: 0.85rem; cursor: pointer; }
+
+/* ── Legal / content page body ── */
+.legal { max-width: 760px; margin: 2.5rem auto 1.5rem; padding: 0 1.25rem; }
+.legal h1 { font-size: var(--fs-2, 2.5rem); margin: 0 0 1.25rem; }
+.legal h2 { font-size: var(--fs-4, 1.2rem); margin-top: 2rem; }
+.legal p, .legal li { color: var(--text, #e8eef5); }
+.legal ul { padding-left: 1.4rem; }
+.legal a { color: var(--brand, #2bb46c); }
+.layout-left .legal { margin-inline: 0; }
+
+/* ── Light-mode support: the model may ship a light palette (light --bg). The
+ * components above reference tokens, so a light palette "just works"; this
+ * nudge keeps subtle white-tint surfaces legible on light backgrounds. ── */
+@media (min-width: 0px) {
+	/* no-op guard block kept intentionally minimal — light/dark is driven by
+	 * the palette tokens, not a separate stylesheet. */
+}
+
+
+/* ── Site palette (model-authored :root tokens — emitted LAST so they win). ── */
+:root {
+	/* ── Palette — the MODEL overrides these 9 brand colours via write_partial(styles).
+	 * Everything else (rhythm/scale/layout) is build-owned; the model isn't asked
+	 * to touch them. NEVER hardcode hex outside :root — reference var(--token). */
+	--bg: #0f1419;
+	--surface: #1a2028;
+	--surface-2: #222a34;
+	--border: rgba(255, 255, 255, 0.08);
+	--text: #e8eef5;
+	--text-muted: #9aa5b1;
+	--brand: #2bb46c;
+	--brand-2: #1f8f54;
+	--accent: #ffcd4d;
+	--on-brand: #ffffff;
+
+	/* ── Layout (build-owned) ── */
+	--container-max: 1200px;
+	--sidebar-w: 240px;
+	--font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+	/* ── Rhythm + scale (build-owned — this is what kills the empty-gap /
+	 * inconsistent-spacing drift; spacing is a token, never a model guess). ── */
+	--section-y: clamp(2.75rem, 6vw, 4.5rem);
+	--gap: clamp(1rem, 2.5vw, 1.75rem);
+	--radius: 14px;
+	--fs-1: clamp(2rem, 5vw, 3.25rem);
+	--fs-2: clamp(1.6rem, 3.5vw, 2.25rem);
+	--fs-3: clamp(1.3rem, 2.6vw, 1.6rem);
+	--fs-4: 1.15rem;
+	--fs-5: 1rem;
+	--fs-6: 0.85rem;
+}
+
+</style>

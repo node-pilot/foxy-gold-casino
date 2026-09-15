@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Wrangler local state / dev cache
+.wrangler/
+
+# Turborepo
+.turbo/
+
+# Local env / secrets — NEVER commit
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+
+# Editor / OS noise
+.DS_Store

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Static fallback sitemap. deploy_worker regenerates this from the actual
+     built pages (host-aware, with hreflang alternates) on every deploy; this
+     placeholder only guarantees /sitemap.xml is reachable on the very first
+     deploy and if sitemap regeneration is skipped. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<url>
+		<loc>https://example.com/</loc>
+	</url>
+</urlset>

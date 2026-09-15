@@ -1,0 +1,42 @@
+<div id="cb" class="cookie-banner" hidden>
+  <p>We use cookies to run this site and improve it. Accept all, or only the essentials. <a href="/cookies">Cookie policy</a>.</p>
+  <button id="cb-yes" class="btn">Accept all</button>
+  <button id="cb-no" class="btn-ghost">Reject non-essential</button>
+</div>
+<script>(function(){var k="cb_consent",e=document.getElementById("cb");if(!e)return;try{if(!localStorage.getItem(k))e.hidden=false}catch(_){e.hidden=false}function set(v){try{localStorage.setItem(k,v)}catch(_){}e.hidden=true}var y=document.getElementById("cb-yes"),n=document.getElementById("cb-no");if(y)y.onclick=function(){set("all")};if(n)n.onclick=function(){set("essential")};})();</script>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="brand-wordmark">Casino Brand</a>
+        <p class="footer-tagline">Independent casino guides, bonuses and game reviews. Play responsibly, 18+ only.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Explore">
+        <h4>Explore</h4>
+        <a href="/">Home</a>
+        <a href="/games">Games</a>
+        <a href="/bonuses">Bonuses</a>
+        <a href="/promotions">Promotions</a>
+      </nav>
+      <nav class="footer-nav" aria-label="Legal">
+        <h4>Legal</h4>
+        <a href="/terms">Terms &amp; Conditions</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/cookies">Cookie Policy</a>
+      </nav>
+      <div class="footer-rg">
+        <h4>Play Safe</h4>
+        <span class="rg-badge" aria-label="18 plus only">18+</span>
+        <a href="/responsible-gambling">Responsible Gambling</a>
+        <a href="https://www.begambleaware.org/" rel="noopener noreferrer" target="_blank">BeGambleAware</a>
+        <a href="https://www.gamcare.org.uk/" rel="noopener noreferrer" target="_blank">GamCare</a>
+      </div>
+    </div>
+    <p class="rg-note"><strong>18+ only.</strong> Please gamble responsibly. Gambling can become a problem, so stay within your limits. Use our <a href="/responsible-gambling">responsible gambling</a> tools, or reach out to <a href="https://www.begambleaware.org/" rel="noopener noreferrer" target="_blank">BeGambleAware.org</a>.</p>
+    <div class="footer-bottom">
+      <p>&copy; <span data-year>2026</span> Casino Brand. All rights reserved.</p>
+      <p>Licensed and regulated. Gamble responsibly. 18+ only.</p>
+      <p class="footer-sitemap"><a href="/sitemap">Sitemap</a></p>
+    </div>
+  </div>
+</footer>
