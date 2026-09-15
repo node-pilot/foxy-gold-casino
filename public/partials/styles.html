@@ -1,4 +1,6 @@
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 /* ============================================================================
  * BUILD-OWNED COMPONENT DESIGN SYSTEM — single source of truth.
  *
@@ -745,38 +747,49 @@ section.section > .container { width: min(100% - 2rem, var(--container-max, 1200
 }
 
 
+/* ── Design variation "Space Grotesk/Manrope · sharp · airy · plain-h · hero-banner · rhythm-plain · glow-cards · nav-left" (build-owned, seeded per brand — variation.ts). ── */
+/* — hero-banner — */
+@media (min-width: 768px) {
+	.hero { padding-block: calc(var(--section-y) * 1.2); }
+	.hero-inner { grid-template-columns: 1fr; }
+	.hero-copy { max-width: 60ch; }
+	.hero-media { width: 100%; min-height: 260px; max-height: 420px; }
+}
+
+/* — glow-cards — */
+.card, .feature, .bonus-card { box-shadow: 0 0 24px color-mix(in srgb, var(--brand) 22%, transparent); }
+.btn, .cta, .aff-link-unresolved { box-shadow: 0 0 18px color-mix(in srgb, var(--brand) 30%, transparent); }
+
+/* — nav-left — */
+@media (min-width: 768px) {
+	.layout-top .site-header .header-inner,
+	.layout-top .site-header .container { justify-content: flex-start; column-gap: 1.75rem; }
+	.layout-top .header-actions { margin-left: auto; }
+}
+
+/* ── Variation tokens (non-colour, build-owned — the model palette block below never overlaps these keys). ── */
+:root {
+	--font: 'Manrope', system-ui, sans-serif;
+	--font-display: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
+	--h-weight: 700;
+	--radius: 0px;
+	--btn-radius: 2px;
+	--section-y: clamp(3.3rem, 7.2vw, 5.4rem);
+	--gap: clamp(1.2rem, 3vw, 2.1rem);
+	--container-max: 1320px;
+}
+
 /* ── Site palette (model-authored :root tokens — emitted LAST so they win). ── */
 :root {
-	/* ── Palette — the MODEL overrides these 9 brand colours via write_partial(styles).
-	 * Everything else (rhythm/scale/layout) is build-owned; the model isn't asked
-	 * to touch them. NEVER hardcode hex outside :root — reference var(--token). */
-	--bg: #0f1419;
-	--surface: #1a2028;
-	--surface-2: #222a34;
-	--border: rgba(255, 255, 255, 0.08);
-	--text: #e8eef5;
-	--text-muted: #9aa5b1;
-	--brand: #2bb46c;
-	--brand-2: #1f8f54;
-	--accent: #ffcd4d;
-	--on-brand: #ffffff;
-
-	/* ── Layout (build-owned) ── */
-	--container-max: 1200px;
-	--sidebar-w: 240px;
-	--font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-	/* ── Rhythm + scale (build-owned — this is what kills the empty-gap /
-	 * inconsistent-spacing drift; spacing is a token, never a model guess). ── */
-	--section-y: clamp(2.75rem, 6vw, 4.5rem);
-	--gap: clamp(1rem, 2.5vw, 1.75rem);
-	--radius: 14px;
-	--fs-1: clamp(2rem, 5vw, 3.25rem);
-	--fs-2: clamp(1.6rem, 3.5vw, 2.25rem);
-	--fs-3: clamp(1.3rem, 2.6vw, 1.6rem);
-	--fs-4: 1.15rem;
-	--fs-5: 1rem;
-	--fs-6: 0.85rem;
+  --bg: #0f0f10;
+  --surface: #1b1b1d;
+  --border: rgba(255,255,255,0.1);
+  --text: #f4f1e8;
+  --text-muted: #a8a297;
+  --brand: #d4af37;
+  --brand-2: #b18f23;
+  --accent: #f5e6a8;
+  --on-brand: #161410;
 }
 
 </style>
